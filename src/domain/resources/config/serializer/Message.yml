@@ -1,0 +1,6 @@
+domain\entity\Message:
+  exclusion_policy: ALL
+  properties:
+    message:
+      expose: true
+      type: string

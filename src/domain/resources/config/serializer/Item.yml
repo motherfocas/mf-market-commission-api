@@ -1,0 +1,12 @@
+domain\entity\Item:
+  exclusion_policy: ALL
+  properties:
+    id:
+      expose: true
+      type: int
+    name:
+      expose: true
+      type: string
+    price:
+      expose: true
+      type: float

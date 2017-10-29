@@ -1,0 +1,6 @@
+domain\entity\Purchases:
+  exclusion_policy: ALL
+  properties:
+    purchases:
+      expose: true
+      type: array<domain\entity\Purchase>

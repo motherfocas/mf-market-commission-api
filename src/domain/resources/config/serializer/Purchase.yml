@@ -1,0 +1,27 @@
+domain\entity\Purchase:
+  exclusion_policy: ALL
+  properties:
+    id:
+      expose: true
+      type: int
+    name:
+      expose: true
+      type: string
+    items:
+      expose: true
+      type: array<domain\entity\Item>
+    user:
+      expose: true
+      type: domain\entity\User
+    date:
+      expose: true
+      type: DateTime
+  virtual_properties:
+    getTotalPrice:
+      serialized_name: total_price
+      type: float
+    getTotalItems:
+      serialized_name: total_items
+      type: int
+  accessor_order: custom
+  custom_accessor_order: [id, name, totalPrice, totalItems, user, date, items]

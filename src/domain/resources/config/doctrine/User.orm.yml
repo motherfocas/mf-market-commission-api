@@ -1,0 +1,21 @@
+domain\entity\User:
+  type: entity
+  table: user
+  fields:
+    id:
+      type: integer
+      id: true
+      generator:
+        strategy: AUTO
+    username:
+      type: string
+      length: 32
+    password:
+      type: string
+      length: 64
+    roles:
+      type: string
+      length: 255
+  uniqueConstraints:
+    username_unique_idx:
+      columns: [username]

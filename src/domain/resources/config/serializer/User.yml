@@ -1,0 +1,13 @@
+domain\entity\User:
+  exclusion_policy: ALL
+  properties:
+    id:
+      expose: true
+      type: int
+    username:
+      expose: true
+      type: string
+    plainPassword:
+      expose: true
+      serialized_name: plain_password
+      type: string

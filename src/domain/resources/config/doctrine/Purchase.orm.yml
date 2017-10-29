@@ -1,0 +1,32 @@
+domain\entity\Purchase:
+  type: entity
+  table: purchase
+  fields:
+    id:
+      type: integer
+      id: true
+      generator:
+        strategy: AUTO
+    name:
+      type: string
+      length: 255
+    date:
+      type: datetime
+  manyToOne:
+    user:
+      targetEntity: User
+      joinColumn:
+        name: user_id
+        referencedColumnName: id
+  manyToMany:
+    items:
+      targetEntity: Item
+      cascade: ["persist"]
+      joinTable:
+        name: purchase_items
+        joinColumns:
+          purchase_id:
+            referencedColumnName: id
+        inverseJoinColumns:
+          item_id:
+            referencedColumnName: id

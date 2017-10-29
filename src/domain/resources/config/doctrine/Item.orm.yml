@@ -1,0 +1,14 @@
+domain\entity\Item:
+  type: entity
+  table: item
+  fields:
+    id:
+      type: integer
+      id: true
+      generator:
+        strategy: AUTO
+    name:
+      type: string
+      length: 255
+    price:
+      type: float
