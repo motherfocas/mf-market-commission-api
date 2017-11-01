@@ -77,7 +77,7 @@ class DoctrinePurchaseRepository implements PurchaseRepository
      * @return Purchase
      * @throws EntityNotSavedException
      */
-    function update(Purchase $purchase): Purchase
+    public function update(Purchase $purchase): Purchase
     {
         try {
             $dbPurchase = $this->findById($purchase->getId());
@@ -99,7 +99,7 @@ class DoctrinePurchaseRepository implements PurchaseRepository
      * @param int $id
      * @throws EntityNotDeletedException
      */
-    function delete(int $id)
+    public function delete(int $id)
     {
         try {
             $purchase = $this->findById($id);

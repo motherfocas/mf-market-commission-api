@@ -6,5 +6,5 @@ use domain\entity\User;
 
 interface UserRepository
 {
-    function save(User $user): User;
+    public function save(User $user): User;
 }

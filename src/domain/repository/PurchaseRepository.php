@@ -6,9 +6,9 @@ use domain\entity\Purchase;
 
 interface PurchaseRepository
 {
-    function find(): array;
-    function findById(int $id);
-    function save(Purchase $purchase): Purchase;
-    function update(Purchase $purchase): Purchase;
-    function delete(int $id);
+    public function find(): array;
+    public function findById(int $id);
+    public function save(Purchase $purchase): Purchase;
+    public function update(Purchase $purchase): Purchase;
+    public function delete(int $id);
 }

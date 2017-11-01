@@ -62,7 +62,7 @@ class DoctrineUserRepository implements UserProviderInterface, UserRepository
      * @return User
      * @throws EntityNotSavedException
      */
-    function save(User $user): User
+    public function save(User $user): User
     {
         try {
             $this->entityManager->persist($user);
