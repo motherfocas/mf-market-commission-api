@@ -162,7 +162,7 @@ class PurchaseController implements ControllerProviderInterface
         catch(NotAuthorizedException $exception) {
             $response = new JsonResponse(
                 $serializer->serialize(new Message($exception->getMessage()), 'json'),
-                Response::HTTP_UNPROCESSABLE_ENTITY
+                Response::HTTP_UNAUTHORIZED
             );
         }
         catch(EntityNotFoundException $exception) {

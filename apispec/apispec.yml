@@ -1,0 +1,258 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: MotherFocas Market Commission
+  description: API documentation for MotherFocas Market Commission.
+#servers:
+#  - url: http://petstore.swagger.io/v1
+paths:
+  /user/:
+    post:
+      summary: Create new user
+      operationId: createUser
+      tags:
+        - User
+      security:
+        []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: 'User created'
+        '400':
+          description: 'Bad Request. Hint: invalid JSON'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '422':
+          description: 'Unprocessable Entity. Hint: username already exists'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '500':
+          description: 'Internal Server Error. Hint: something crashed so hard'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+  /purchase/:
+    get:
+      summary: List all purchases
+      operationId: listPurchases
+      tags:
+        - Purchase
+      security:
+        - basicAuth: []
+      responses:
+        '200':
+          description: 'List of purchases'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Purchases"
+    post:
+      summary: Create purchase
+      operationId: createPurchases
+      tags:
+        - Purchase
+      security:
+        - basicAuth: []
+      responses:
+        '201':
+          description: 'Purchase created'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Purchase"
+        '422':
+          description: 'Unprocessable Entity. Hint: random purchase error'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+        '500':
+          description: 'Internal Server Error. Hint: something crashed so hard'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+  /purchase/{id}/:
+    get:
+      summary: Get details of a purchase
+      operationId: getPurchase
+      tags:
+        - Purchase
+      security:
+        - basicAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the purchase
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'Found purchase'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Purchase"
+        '404':
+          description: 'Not found purchase'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+    patch:
+      summary: Update purchase
+      operationId: updatePurchase
+      tags:
+        - Purchase
+      security:
+        - basicAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the purchase
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'Purchase updated'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Purchase"
+        '401':
+          description: 'Not authorized'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+        '422':
+          description: 'Unprocessable Entity. Hint: random purchase error'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+        '500':
+          description: 'Internal Server Error. Hint: something crashed so hard'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+    delete:
+      summary: Delete purchase
+      operationId: deletePurchase
+      tags:
+        - Purchase
+      security:
+        - basicAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the purchase
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'Purchase deleted'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Purchase"
+        '401':
+          description: 'Not authorized'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+        '404':
+          description: 'Not found purchase'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+        '422':
+          description: 'Unprocessable Entity. Hint: random purchase error'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+        '500':
+          description: 'Internal Server Error. Hint: something crashed so hard'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+components:
+  schemas:
+    User:
+      required:
+        - username
+        - plain_password
+      properties:
+        username:
+          type: string
+        plain_password:
+          type: string
+    Purchase:
+      required:
+        - name
+        - items
+      properties:
+        id:
+          type: number
+        name:
+          type: string
+        items:
+          type: array
+          $ref: '#/components/schemas/Items'
+    Purchases:
+      required:
+        - purchases
+      properties:
+        purchases:
+          type: array
+          items:
+            $ref: '#/components/schemas/Purchase'
+    Item:
+      required:
+        - name
+        - price
+      properties:
+        id:
+          type: number
+        name:
+          type: string
+        price:
+          type: number
+    Items:
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Item'
+    Message:
+      required:
+        - message
+      properties:
+        message:
+          type: string
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+security:
+  - basicAuth: []
