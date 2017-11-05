@@ -15,6 +15,8 @@ Install all dependencies:
 composer install
 ```
 
+Configure DB connection: copy ```config/parameters.yml.dist``` to ```config/parameters.yml``` and edit connection parameters.
+
 Create tables:
 
 ```bash
