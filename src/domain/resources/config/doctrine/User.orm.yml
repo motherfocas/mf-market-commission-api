@@ -12,6 +12,9 @@ domain\entity\User:
       length: 32
     password:
       type: string
+      length: 100
+    salt:
+      type: string
       length: 64
     roles:
       type: string

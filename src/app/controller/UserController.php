@@ -15,10 +15,12 @@ use Silex\Application;
 use Silex\ControllerCollection;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Security\Core\Encoder\BCryptPasswordEncoder;
+use Symfony\Component\Security\Core\Encoder\MessageDigestPasswordEncoder;
 
 class UserController implements ControllerProviderInterface
 {
+    private const SALT_LENGTH = 32;
+
     public function connect(Application $app)
     {
         /** @var ControllerCollection $factory */
@@ -34,15 +36,17 @@ class UserController implements ControllerProviderInterface
         $serializer = $app['serializer'];
         /** @var JsonToUserMapper $mapper */
         $mapper = $app['mapper.json_to_user'];
-        /** @var BCryptPasswordEncoder $encoder */
-        $encoder = $app['security.encoder.bcrypt'];
+        /** @var MessageDigestPasswordEncoder $encoder */
+        $encoder = $app['security.encoder.digest'];
         $response = null;
 
         try {
             /** @var User $user */
             $user = $mapper->map($request->getContent());
             $user->setRoles(['ROLE_USER']);
-            $user->setPassword($encoder->encodePassword($user->getPlainPassword(), null));
+            $salt = random_bytes(self::SALT_LENGTH);
+            $user->setPassword($encoder->encodePassword($user->getPlainPassword(), $salt));
+            $user->setSalt($salt);
             $app['usecase.user.save']->execute($user);
             $response = new JsonResponse(null, Response::HTTP_CREATED);
         }

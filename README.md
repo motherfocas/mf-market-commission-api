@@ -3,7 +3,7 @@
 ## Prerequisites
 
 - MySQL / MariaDB
-- PHP
+- PHP + pdo_mysql
 - [Composer](https://getcomposer.org/)
 - A web server
 

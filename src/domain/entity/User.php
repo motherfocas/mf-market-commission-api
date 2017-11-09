@@ -24,6 +24,11 @@ class User implements UserInterface
 
     /**
      * @var string
+     */
+    private $salt;
+
+    /**
+     * @var string
      *
      * @Assert/Length(max=4096)
      */
@@ -57,7 +62,13 @@ class User implements UserInterface
 
     public function getSalt(): ?string
     {
-        return null;
+        return hex2bin($this->salt);
+    }
+
+    public function setSalt(string $salt): User
+    {
+        $this->salt = bin2hex($salt);
+        return $this;
     }
 
     public function getPlainPassword(): ?string

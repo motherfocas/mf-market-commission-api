@@ -19,6 +19,7 @@ use Silex\Provider\DoctrineServiceProvider;
 use Silex\Provider\TwigServiceProvider;
 use Silex\Provider\ServiceControllerServiceProvider;
 use Silex\Provider\HttpFragmentServiceProvider;
+use Symfony\Component\Security\Core\Encoder\EncoderFactory;
 
 $app = new Application();
 $app->register(new ServiceControllerServiceProvider());
@@ -52,7 +53,7 @@ $app['twig'] = $app->extend('twig', function ($twig, $app) {
 
     return $twig;
 });
-$app['debug'] = true;
+$app['debug'] = false;
 
 //
 // Repositories
@@ -110,5 +111,10 @@ $app->register(new Silex\Provider\SecurityServiceProvider(), [
         ]
     ]
 ]);
+$app['security.encoder_factory'] = function($app) {
+    return new EncoderFactory(array(
+        'domain\entity\User' => $app['security.encoder.digest'],
+    ));
+};
 
 return $app;

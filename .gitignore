@@ -5,3 +5,6 @@ config/parameters.yml
 
 # IDEs
 /.idea/
+
+# Cache
+/cache/
