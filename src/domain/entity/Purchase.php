@@ -62,14 +62,18 @@ class Purchase
     public function update(Purchase $purchase)
     {
         if(isset($purchase->name)) $this->name = $purchase->name;
+        $updatedItems = [];
 
         foreach($purchase->items as $item) {
             $foundItem = $this->findItem($item);
 
             if($foundItem !== null) {
                 $foundItem->update($item);
+                array_push($updatedItems, $foundItem);
             }
         }
+
+        $this->items = $updatedItems;
     }
 
     public function getTotalPrice(): float
