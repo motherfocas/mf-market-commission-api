@@ -7,13 +7,17 @@ use Doctrine\ORM\EntityRepository;
 use domain\entity\User;
 use domain\repository\UserRepository;
 use Exception;
+use infrastructure\exception\EntityNotFoundException;
 use infrastructure\exception\EntityNotSavedException;
+use League\OAuth2\Server\Entities\ClientEntityInterface;
+use League\OAuth2\Server\Entities\UserEntityInterface;
+use League\OAuth2\Server\Repositories\UserRepositoryInterface;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 
-class DoctrineUserRepository implements UserProviderInterface, UserRepository
+class DoctrineUserRepository implements UserProviderInterface, UserRepository, UserRepositoryInterface
 {
     /**
      * @var EntityRepository
@@ -70,6 +74,56 @@ class DoctrineUserRepository implements UserProviderInterface, UserRepository
         }
         catch(Exception $exception) {
             throw new EntityNotSavedException('Cannot save user');
+        }
+
+        return $user;
+    }
+
+    /**
+     * Get a user entity.
+     *
+     * @param string $username
+     * @param string $password
+     * @param string $grantType The grant type used
+     * @param ClientEntityInterface $clientEntity
+     *
+     * @return UserEntityInterface
+     */
+    public function getUserEntityByUserCredentials(
+        $username,
+        $password,
+        $grantType,
+        ClientEntityInterface $clientEntity
+    )
+    {
+        if($grantType === 'password') {
+            try {
+                return $this->findByCredentials($username, $password);
+            }
+            catch(EntityNotFoundException $exception) {
+                return null;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param string $username
+     * @param string $password
+     * @return User|null|
+     * @throws EntityNotFoundException
+     */
+    private function findByCredentials(string $username, string $password)
+    {
+        /** @var User $user */
+        $user = $this->entityRepository->findOneBy([
+            'username' => $username,
+            'password' => $password
+        ]);
+
+        if($user === null) {
+            throw new EntityNotFoundException('User not found');
         }
 
         return $user;

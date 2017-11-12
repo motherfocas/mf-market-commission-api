@@ -2,6 +2,10 @@
 
 use Dflydev\Provider\DoctrineOrm\DoctrineOrmServiceProvider;
 use Doctrine\ORM\EntityManager;
+use domain\entity\oauth\AccessToken;
+use domain\entity\oauth\Client;
+use domain\entity\oauth\RefreshToken;
+use domain\entity\oauth\Scope;
 use domain\entity\Purchase;
 use domain\entity\User;
 use domain\mapper\JsonToUserMapper;
@@ -11,21 +15,27 @@ use domain\usecase\PurchaseFindUseCase;
 use domain\usecase\PurchaseSaveUseCase;
 use domain\usecase\PurchaseUpdateUseCase;
 use domain\usecase\UserSaveUseCase;
+use infrastructure\repository\DoctrineAccessTokenRepository;
+use infrastructure\repository\DoctrineClientRepository;
 use infrastructure\repository\DoctrinePurchaseRepository;
+use infrastructure\repository\DoctrineRefreshTokenRepository;
+use infrastructure\repository\DoctrineScopeRepository;
 use infrastructure\repository\DoctrineUserRepository;
+use League\OAuth2\Server\AuthorizationServer;
+use League\OAuth2\Server\Grant\PasswordGrant;
 use Silex\Application;
-use Silex\Provider\AssetServiceProvider;
 use Silex\Provider\DoctrineServiceProvider;
 use Silex\Provider\TwigServiceProvider;
 use Silex\Provider\ServiceControllerServiceProvider;
-use Silex\Provider\HttpFragmentServiceProvider;
 use Symfony\Component\Security\Core\Encoder\EncoderFactory;
 
 $app = new Application();
+
+//
+// Providers
+//
 $app->register(new ServiceControllerServiceProvider());
-$app->register(new AssetServiceProvider());
 $app->register(new TwigServiceProvider());
-$app->register(new HttpFragmentServiceProvider());
 $app->register(new Rpodwika\Silex\YamlConfigServiceProvider(__DIR__ . '/../config/parameters.yml'));
 $app->register(new JDesrosiers\Silex\Provider\JmsSerializerServiceProvider(), [
     'serializer.srcDir' => __DIR__ . '/../vendor/jms/serializer/src',
@@ -41,19 +51,17 @@ $app->register(new DoctrineOrmServiceProvider, [
         'mappings' => [
             [
                 'type' => 'simple_yml',
-                'namespace' => 'domain\entity',
-                'path' => __DIR__.'/domain/resources/config/doctrine',
+                'namespace' => 'domain\entity\oauth',
+                'path' => __DIR__ . '/domain/resources/config/doctrine/oauth'
             ],
-        ],
-    ],
+            [
+                'type' => 'simple_yml',
+                'namespace' => 'domain\entity',
+                'path' => __DIR__ . '/domain/resources/config/doctrine'
+            ]
+        ]
+    ]
 ]);
-
-$app['twig'] = $app->extend('twig', function ($twig, $app) {
-    // add custom globals, filters, tags, ...
-
-    return $twig;
-});
-$app['debug'] = false;
 
 //
 // Repositories
@@ -67,6 +75,26 @@ $app['repository.user'] = function($app): DoctrineUserRepository {
     /** @var EntityManager $entityManager */
     $entityManager = $app['orm.em'];
     return new DoctrineUserRepository($entityManager->getRepository(User::class), $entityManager);
+};
+$app['repository.oauth.client'] = function($app): DoctrineClientRepository {
+    /** @var EntityManager $entityManager */
+    $entityManager = $app['orm.em'];
+    return new DoctrineClientRepository($entityManager->getRepository(Client::class));
+};
+$app['repository.oauth.scope'] = function($app): DoctrineScopeRepository {
+    /** @var EntityManager $entityManager */
+    $entityManager = $app['orm.em'];
+    return new DoctrineScopeRepository($entityManager->getRepository(Scope::class));
+};
+$app['repository.oauth.access_token'] = function($app): DoctrineAccessTokenRepository {
+    /** @var EntityManager $entityManager */
+    $entityManager = $app['orm.em'];
+    return new DoctrineAccessTokenRepository($entityManager->getRepository(AccessToken::class), $entityManager);
+};
+$app['repository.oauth.refresh_token'] = function($app): DoctrineRefreshTokenRepository {
+    /** @var EntityManager $entityManager */
+    $entityManager = $app['orm.em'];
+    return new DoctrineRefreshTokenRepository($entityManager->getRepository(RefreshToken::class), $entityManager);
 };
 
 //
@@ -116,5 +144,27 @@ $app['security.encoder_factory'] = function($app) {
         'domain\entity\User' => $app['security.encoder.digest'],
     ));
 };
+
+//
+// OAuth
+//
+$privateKeyPath = __DIR__ . '/../keys/private.key';
+$encryptionKey = file_get_contents(__DIR__ . '/../keys/encryption.key');
+
+$authServer = new AuthorizationServer(
+    $app['repository.oauth.client'],
+    $app['repository.oauth.access_token'],
+    $app['repository.oauth.scope'],
+    $privateKeyPath,
+    $encryptionKey
+);
+$authGrant = new PasswordGrant($app['repository.user'], $app['repository.oauth.refresh_token']);
+$authGrant->setRefreshTokenTTL(new DateInterval('P1M'));            // Refresh TTL: 1 month
+$authServer->enableGrantType($authGrant, new DateInterval('PT1H')); // Access TTL: 1 hour
+
+//
+// Debug mode
+//
+$app['debug'] = false;
 
 return $app;

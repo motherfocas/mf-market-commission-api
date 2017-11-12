@@ -1,4 +1,5 @@
 config/parameters.yml
+keys/
 
 # Depencies
 /vendor/

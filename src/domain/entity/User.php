@@ -2,10 +2,11 @@
 
 namespace domain\entity;
 
+use League\OAuth2\Server\Entities\UserEntityInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
-class User implements UserInterface
+class User implements UserInterface, UserEntityInterface
 {
     /**
      * @var int
@@ -88,4 +89,14 @@ class User implements UserInterface
     }
 
     public function eraseCredentials() {}
+
+    /**
+     * Return the user's identifier.
+     *
+     * @return mixed
+     */
+    public function getIdentifier()
+    {
+        return $this->id;
+    }
 }
