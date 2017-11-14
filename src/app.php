@@ -8,6 +8,7 @@ use domain\entity\oauth\RefreshToken;
 use domain\entity\oauth\Scope;
 use domain\entity\Purchase;
 use domain\entity\User;
+use domain\helper\HttpFoundationHelper;
 use domain\mapper\JsonToUserMapper;
 use domain\usecase\PurchaseDeleteUseCase;
 use domain\usecase\PurchaseFindByIdUseCase;
@@ -27,6 +28,8 @@ use Silex\Application;
 use Silex\Provider\DoctrineServiceProvider;
 use Silex\Provider\TwigServiceProvider;
 use Silex\Provider\ServiceControllerServiceProvider;
+use Symfony\Bridge\PsrHttpMessage\Factory\DiactorosFactory;
+use Symfony\Bridge\PsrHttpMessage\Factory\HttpFoundationFactory;
 use Symfony\Component\Security\Core\Encoder\EncoderFactory;
 
 $app = new Application();
@@ -161,6 +164,20 @@ $authServer = new AuthorizationServer(
 $authGrant = new PasswordGrant($app['repository.user'], $app['repository.oauth.refresh_token']);
 $authGrant->setRefreshTokenTTL(new DateInterval('P1M'));            // Refresh TTL: 1 month
 $authServer->enableGrantType($authGrant, new DateInterval('PT1H')); // Access TTL: 1 hour
+$app['auth.server'] = $authServer;
+
+//
+// Others
+//
+$app['http.foundation.factory'] = function(): HttpFoundationFactory {
+    return new HttpFoundationFactory();
+};
+$app['diactoros.factory'] = function(): DiactorosFactory {
+    return new DiactorosFactory();
+};
+$app['http.foundation.helper'] = function(): HttpFoundationHelper {
+    return new HttpFoundationHelper();
+};
 
 //
 // Debug mode
