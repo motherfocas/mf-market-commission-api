@@ -34,7 +34,7 @@ class DoctrineClientRepository implements ClientRepositoryInterface
         /** @var ClientEntityInterface|null $entity */
         $entity = $this->entityRepository->findOneBy([
             'identifier' => $clientIdentifier,
-            'grant_type' => $grantType
+            'grantType' => $grantType
         ]);
 
         return $entity;

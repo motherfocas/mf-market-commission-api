@@ -9,4 +9,9 @@ use League\OAuth2\Server\Entities\Traits\EntityTrait;
 class Client implements ClientEntityInterface
 {
     use EntityTrait, ClientTrait;
+
+    /**
+     * @var string
+     */
+    private $grantType;
 }

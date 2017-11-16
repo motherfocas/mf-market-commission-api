@@ -108,6 +108,6 @@ class DoctrineAccessTokenRepository implements AccessTokenRepositoryInterface
 
     private function findById(string $id)
     {
-        return $this->entityRepository->findOneBy(['id' => $id]);
+        return $this->entityRepository->findOneBy(['identifier' => $id]);
     }
 }

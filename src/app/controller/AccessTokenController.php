@@ -44,11 +44,11 @@ class AccessTokenController implements ControllerProviderInterface
             $psrResponse = $diactorosFactory->createResponse(new Response());
             $httpFoundationHelper->fillRequestFromJson($request);
             $authServer->respondToAccessTokenRequest(
-                $diactorosFactory->createRequest($request::createFromGlobals()),
+                $diactorosFactory->createRequest($request),
                 $psrResponse
             );
 
-            $response = $httpFoundationFactory->createResponse($psrResponse);
+            $response = new JsonResponse($psrResponse->getBody(), $psrResponse->getStatusCode());
         }
         catch(OAuthServerException $exception) {
             $response = new JsonResponse(new Message($exception->getMessage()), $exception->getHttpStatusCode());

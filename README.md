@@ -26,3 +26,11 @@ bin/console orm:schema-tool:create
 Configure Silex with web server:
 
 [https://silex.symfony.com/doc/2.0/web_servers.html](https://silex.symfony.com/doc/2.0/web_servers.html)
+
+## Usage
+
+Fast and dirty PHP built-in server:
+
+```bash
+composer run-script server --timeout=0
+```

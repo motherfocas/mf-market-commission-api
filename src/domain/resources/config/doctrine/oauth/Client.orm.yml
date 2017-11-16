@@ -10,6 +10,10 @@ domain\entity\oauth\Client:
     name:
       type: string
       length: 255
+    grantType:
+      column: grant_type
+      type: string
+      length: 30
     redirectUri:
       column: redirect_uri
       type: string
