@@ -23,15 +23,28 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 
 class PurchaseController implements ControllerProviderInterface
 {
+    private $authMiddleware;
+
+    public function __construct()
+    {
+        $this->authMiddleware = function(Request $request, Application $app) {
+            $authResult = $app['auth.middleware']->invoke($app, $request);
+
+            if($authResult !== true) {
+                return $authResult;
+            }
+        };
+    }
+
     public function connect(Application $app): ControllerCollection
     {
         /** @var ControllerCollection $factory */
         $factory = $app['controllers_factory'];
         $factory->get('', 'app\controller\PurchaseController::list');
-        $factory->get('/{id}/', 'app\controller\PurchaseController::findById');
-        $factory->post('', 'app\controller\PurchaseController::save');
-        $factory->patch('/{id}/', 'app\controller\PurchaseController::update');
-        $factory->delete('/{id}/', 'app\controller\PurchaseController::delete');
+        $factory->get('/{id}/', 'app\controller\PurchaseController::findById')->before($this->authMiddleware);
+        $factory->post('', 'app\controller\PurchaseController::save')->before($this->authMiddleware);
+        $factory->patch('/{id}/', 'app\controller\PurchaseController::update')->before($this->authMiddleware);
+        $factory->delete('/{id}/', 'app\controller\PurchaseController::delete')->before($this->authMiddleware);
 
         return $factory;
     }

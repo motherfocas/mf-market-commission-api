@@ -1,5 +1,6 @@
 <?php
 
+use app\middleware\AuthMiddleware;
 use Dflydev\Provider\DoctrineOrm\DoctrineOrmServiceProvider;
 use Doctrine\ORM\EntityManager;
 use domain\entity\oauth\AccessToken;
@@ -24,7 +25,6 @@ use infrastructure\repository\DoctrineScopeRepository;
 use infrastructure\repository\DoctrineUserRepository;
 use League\OAuth2\Server\AuthorizationServer;
 use League\OAuth2\Server\Grant\PasswordGrant;
-use League\OAuth2\Server\Middleware\ResourceServerMiddleware;
 use League\OAuth2\Server\ResourceServer;
 use Silex\Application;
 use Silex\Provider\DoctrineServiceProvider;
@@ -32,7 +32,6 @@ use Silex\Provider\TwigServiceProvider;
 use Silex\Provider\ServiceControllerServiceProvider;
 use Symfony\Bridge\PsrHttpMessage\Factory\DiactorosFactory;
 use Symfony\Bridge\PsrHttpMessage\Factory\HttpFoundationFactory;
-use Symfony\Component\Security\Core\Encoder\EncoderFactory;
 
 $app = new Application();
 
@@ -133,24 +132,6 @@ $app['mapper.json_to_user'] = function($app): JsonToUserMapper {
 };
 
 //
-// Late registers
-//
-$app->register(new Silex\Provider\SecurityServiceProvider(), [
-    'security.firewalls' => [
-        'purchase' => [
-            'pattern' => '^/purchase',
-            'http' => true,
-            'users' => $app['repository.user']
-        ]
-    ]
-]);
-$app['security.encoder_factory'] = function($app) {
-    return new EncoderFactory(array(
-        'domain\entity\User' => $app['security.encoder.digest'],
-    ));
-};
-
-//
 // OAuth
 //
 $publicKeyPath = __DIR__ . '/../keys/public.key';
@@ -168,7 +149,7 @@ $authGrant = new PasswordGrant($app['repository.user'], $app['repository.oauth.r
 $authGrant->setRefreshTokenTTL(new DateInterval('P1M'));            // Refresh TTL: 1 month
 $authServer->enableGrantType($authGrant, new DateInterval('PT1H')); // Access TTL: 1 hour
 $app['auth.server'] = $authServer;
-$app['auth.middleware'] = new ResourceServerMiddleware(
+$app['auth.middleware'] = new AuthMiddleware(
     new ResourceServer($app['repository.oauth.access_token'], $publicKeyPath)
 );
 

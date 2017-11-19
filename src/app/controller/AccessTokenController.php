@@ -12,7 +12,6 @@ use Silex\Api\ControllerProviderInterface;
 use Silex\Application;
 use Silex\ControllerCollection;
 use Symfony\Bridge\PsrHttpMessage\Factory\DiactorosFactory;
-use Symfony\Bridge\PsrHttpMessage\Factory\HttpFoundationFactory;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -33,8 +32,6 @@ class AccessTokenController implements ControllerProviderInterface
         $authServer = $app['auth.server'];
         /** @var DiactorosFactory $diactorosFactory */
         $diactorosFactory = $app['diactoros.factory'];
-        /** @var HttpFoundationFactory $httpFoundationFactory */
-        $httpFoundationFactory = $app['http.foundation.factory'];
         /** @var HttpFoundationHelper $httpFoundationHelper */
         $httpFoundationHelper = $app['http.foundation.helper'];
         /** @var Response $response */
