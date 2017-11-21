@@ -32,6 +32,7 @@ use Silex\Provider\TwigServiceProvider;
 use Silex\Provider\ServiceControllerServiceProvider;
 use Symfony\Bridge\PsrHttpMessage\Factory\DiactorosFactory;
 use Symfony\Bridge\PsrHttpMessage\Factory\HttpFoundationFactory;
+use Symfony\Component\Security\Core\Encoder\MessageDigestPasswordEncoder;
 
 $app = new Application();
 
@@ -138,6 +139,7 @@ $publicKeyPath = __DIR__ . '/../keys/public.key';
 $privateKeyPath = __DIR__ . '/../keys/private.key';
 $encryptionKey = file_get_contents(__DIR__ . '/../keys/encryption.key');
 
+$app['security.encoder.digest'] = new MessageDigestPasswordEncoder();
 $authServer = new AuthorizationServer(
     $app['repository.oauth.client'],
     $app['repository.oauth.access_token'],
