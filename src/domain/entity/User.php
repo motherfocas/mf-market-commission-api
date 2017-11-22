@@ -68,7 +68,7 @@ class User implements UserInterface, UserEntityInterface
 
     public function setSalt(string $salt): User
     {
-        $this->salt = bin2hex($salt);
+        $this->salt = $salt;
         return $this;
     }
 

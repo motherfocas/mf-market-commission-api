@@ -19,7 +19,6 @@ use Silex\Application;
 use Silex\ControllerCollection;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class PurchaseController implements ControllerProviderInterface
 {
@@ -40,7 +39,7 @@ class PurchaseController implements ControllerProviderInterface
     {
         /** @var ControllerCollection $factory */
         $factory = $app['controllers_factory'];
-        $factory->get('', 'app\controller\PurchaseController::list');
+        $factory->get('', 'app\controller\PurchaseController::list')->before($this->authMiddleware);
         $factory->get('/{id}/', 'app\controller\PurchaseController::findById')->before($this->authMiddleware);
         $factory->post('', 'app\controller\PurchaseController::save')->before($this->authMiddleware);
         $factory->patch('/{id}/', 'app\controller\PurchaseController::update')->before($this->authMiddleware);
@@ -85,14 +84,13 @@ class PurchaseController implements ControllerProviderInterface
     {
         /** @var SerializerInterface $serializer */
         $serializer = $app['serializer'];
-        /** @var TokenStorageInterface $tokenStorage */
-        $tokenStorage = $app['security.token_storage'];
+        $user = $app['usecase.user.find_by_id']->execute($this->getUserId($request));
         $response = null;
 
         try {
             /** @var Purchase $purchase */
             $purchase = $serializer->deserialize($request->getContent(), Purchase::class, 'json');
-            $purchase->setUser($tokenStorage->getToken()->getUser());
+            $purchase->setUser($user);
             $purchase->setDate(new DateTime());
             $response = new JsonResponse(
                 $serializer->serialize($app['usecase.purchase.save']->execute($purchase), 'json'),
@@ -107,7 +105,7 @@ class PurchaseController implements ControllerProviderInterface
         }
         catch(Exception $exception) {
             $response = new JsonResponse(
-                $serializer->serialize(new Message('Cannot save purchase'), 'json'),
+                $serializer->serialize(new Message('Cannot save purchase: ' . $exception->getMessage()), 'json'),
                 Response::HTTP_INTERNAL_SERVER_ERROR
             );
         }
@@ -119,14 +117,13 @@ class PurchaseController implements ControllerProviderInterface
     {
         /** @var SerializerInterface $serializer */
         $serializer = $app['serializer'];
-        /** @var TokenStorageInterface $tokenStorage */
-        $tokenStorage = $app['security.token_storage'];
+        $user = $app['usecase.user.find_by_id']->execute($this->getUserId($request));
         $response = null;
 
         try {
             /** @var Purchase $dbPurchase */
             $dbPurchase = $app['usecase.purchase.find_by_id']->execute($id);
-            $this->checkPermission($dbPurchase, $tokenStorage->getToken()->getUser());
+            $this->checkPermission($dbPurchase, $user);
             /** @var Purchase $purchase */
             $purchase = $serializer->deserialize($request->getContent(), Purchase::class, 'json');
             $purchase->setId($id);
@@ -149,7 +146,7 @@ class PurchaseController implements ControllerProviderInterface
         }
         catch(Exception $exception) {
             $response = new JsonResponse(
-                $serializer->serialize(new Message('Cannot update purchase'), 'json'),
+                $serializer->serialize(new Message('Cannot update purchase: ' . $exception->getMessage()), 'json'),
                 Response::HTTP_INTERNAL_SERVER_ERROR
             );
         }
@@ -157,18 +154,17 @@ class PurchaseController implements ControllerProviderInterface
         return $response;
     }
 
-    public function delete(Application $app, $id)
+    public function delete(Application $app, $id, Request $request)
     {
         /** @var SerializerInterface $serializer */
         $serializer = $app['serializer'];
-        /** @var TokenStorageInterface $tokenStorage */
-        $tokenStorage = $app['security.token_storage'];
+        $user = $app['usecase.user.find_by_id']->execute($this->getUserId($request));
         $response = null;
 
         try {
             /** @var Purchase $dbPurchase */
             $dbPurchase = $app['usecase.purchase.find_by_id']->execute($id);
-            $this->checkPermission($dbPurchase, $tokenStorage->getToken()->getUser());
+            $this->checkPermission($dbPurchase, $user);
             $app['usecase.purchase.delete']->execute($id);
             $response = new JsonResponse(null, Response::HTTP_OK);
         }
@@ -192,7 +188,7 @@ class PurchaseController implements ControllerProviderInterface
         }
         catch(Exception $exception) {
             $response = new JsonResponse(
-                $serializer->serialize(new Message('Cannot delete purchase'), 'json'),
+                $serializer->serialize(new Message('Cannot delete purchase: ' . $exception->getMessage()), 'json'),
                 Response::HTTP_INTERNAL_SERVER_ERROR
             );
         }
@@ -210,5 +206,10 @@ class PurchaseController implements ControllerProviderInterface
         if(!$purchase->isAuthorized($user)) {
             throw new NotAuthorizedException('You cannot modify or delete other user\'s purchases');
         }
+    }
+
+    private function getUserId(Request $request)
+    {
+        return $request->attributes->get('user_id');
     }
 }

@@ -4,6 +4,7 @@ namespace app\middleware;
 
 use domain\entity\Message;
 use domain\response\JsonResponse;
+use Exception;
 use League\OAuth2\Server\Exception\OAuthServerException;
 use League\OAuth2\Server\ResourceServer;
 use Silex\Application;
@@ -38,13 +39,14 @@ class AuthMiddleware
         $psrRequest = $diactorosFactory->createRequest($request);
 
         try {
-            $this->server->validateAuthenticatedRequest($psrRequest);
+            $psrRequest = $this->server->validateAuthenticatedRequest($psrRequest);
+            $request->attributes->set('user_id', $psrRequest->getAttribute('oauth_user_id'));
             return true;
         }
         catch(OAuthServerException $exception) {
             return new JsonResponse(new Message($exception->getMessage()), $exception->getHttpStatusCode());
         }
-        catch(\Exception $exception) {
+        catch(Exception $exception) {
             return new JsonResponse(new Message($exception->getMessage()), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }

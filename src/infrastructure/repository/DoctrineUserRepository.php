@@ -63,6 +63,23 @@ class DoctrineUserRepository implements UserProviderInterface, UserRepository, U
     }
 
     /**
+     * @param int $id
+     * @return User
+     * @throws EntityNotFoundException
+     */
+    public function findById(int $id): User
+    {
+        /** @var User $entity */
+        $entity = $this->entityRepository->find($id);
+
+        if($entity === null) {
+            throw new EntityNotFoundException('Purchase ' . $id . ' not found');
+        }
+
+        return $entity;
+    }
+
+    /**
      * @param User $user
      * @return User
      * @throws EntityNotSavedException

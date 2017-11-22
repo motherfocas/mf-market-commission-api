@@ -44,7 +44,7 @@ class UserController implements ControllerProviderInterface
             /** @var User $user */
             $user = $mapper->map($request->getContent());
             $user->setRoles(['ROLE_USER']);
-            $salt = random_bytes(self::SALT_LENGTH);
+            $salt = bin2hex(random_bytes(self::SALT_LENGTH));
             $user->setPassword($encoder->encodePassword($user->getPlainPassword(), $salt));
             $user->setSalt($salt);
             $app['usecase.user.save']->execute($user);
@@ -64,7 +64,7 @@ class UserController implements ControllerProviderInterface
         }
         catch(Exception $exception) {
             $response = new JsonResponse(
-                $serializer->serialize(new Message('Cannot save user'), 'json'),
+                $serializer->serialize(new Message('Cannot save user: ' . $exception->getMessage()), 'json'),
                 Response::HTTP_INTERNAL_SERVER_ERROR
             );
         }

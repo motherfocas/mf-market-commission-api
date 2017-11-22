@@ -42,7 +42,7 @@ class DoctrinePurchaseRepository implements PurchaseRepository
      * @return Purchase
      * @throws EntityNotFoundException
      */
-    public function findById(int $id)
+    public function findById(int $id): Purchase
     {
         /** @var Purchase $entity */
         $entity = $this->entityRepository->find($id);

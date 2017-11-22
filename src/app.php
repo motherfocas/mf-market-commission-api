@@ -16,6 +16,7 @@ use domain\usecase\PurchaseFindByIdUseCase;
 use domain\usecase\PurchaseFindUseCase;
 use domain\usecase\PurchaseSaveUseCase;
 use domain\usecase\PurchaseUpdateUseCase;
+use domain\usecase\UserFindByIdUseCase;
 use domain\usecase\UserSaveUseCase;
 use infrastructure\repository\DoctrineAccessTokenRepository;
 use infrastructure\repository\DoctrineClientRepository;
@@ -119,6 +120,9 @@ $app['usecase.purchase.update'] = function($app): PurchaseUpdateUseCase {
 };
 $app['usecase.purchase.delete'] = function($app): PurchaseDeleteUseCase {
     return new PurchaseDeleteUseCase($app['repository.purchase']);
+};
+$app['usecase.user.find_by_id'] = function($app): UserFindByIdUseCase {
+    return new UserFindByIdUseCase($app['repository.user']);
 };
 $app['usecase.user.save'] = function($app): UserSaveUseCase {
     return new UserSaveUseCase($app['repository.user']);

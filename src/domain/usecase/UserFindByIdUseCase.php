@@ -5,7 +5,7 @@ namespace domain\usecase;
 use domain\entity\User;
 use domain\repository\UserRepository;
 
-class UserSaveUseCase
+class UserFindByIdUseCase
 {
     /**
      * @var UserRepository
@@ -17,8 +17,8 @@ class UserSaveUseCase
         $this->repository = $repository;
     }
 
-    public function execute(User $user): User
+    public function execute(int $id): User
     {
-        return $this->repository->save($user);
+        return $this->repository->findById($id);
     }
 }
