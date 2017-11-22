@@ -1,0 +1,20 @@
+domain\entity\oauth\Client:
+  type: entity
+  table: oauth_client
+  fields:
+    identifier:
+      column: id
+      type: string
+      length: 40
+      id: true
+    name:
+      type: string
+      length: 255
+    grantType:
+      column: grant_type
+      type: string
+      length: 30
+    redirectUri:
+      column: redirect_uri
+      type: string
+      length: 255

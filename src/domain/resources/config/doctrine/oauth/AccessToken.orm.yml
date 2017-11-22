@@ -1,0 +1,30 @@
+domain\entity\oauth\AccessToken:
+  type: entity
+  table: oauth_access_token
+  fields:
+    identifier:
+      column: id
+      type: string
+      length: 100
+      id: true
+    expiryDateTime:
+      column: expiry
+      type: datetime
+    userIdentifier:
+      column: user_id
+      type: integer
+  manyToOne:
+    client:
+      targetEntity: Client
+      joinColumn:
+        name: client_id
+        referencedColumnName: id
+  manyToMany:
+    scopes:
+      targetEntity: Scope
+      joinColumns:
+        access_token_id:
+          referencedColumnName: id
+      inverseJoinColumns:
+        scope_id:
+          referencedColumnName: id

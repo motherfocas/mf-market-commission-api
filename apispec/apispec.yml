@@ -6,6 +6,39 @@ info:
 #servers:
 #  - url: http://petstore.swagger.io/v1
 paths:
+  /accesstoken/:
+    post:
+      summary: Request access token
+      operationId: requestAccessToken
+      tags:
+        - Access Token
+      security:
+        []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccessTokenRequest'
+      responses:
+        '200':
+          description: 'Access token created'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessTokenResponse'
+        '400':
+          description: 'Bad Request. Hint: invalid JSON'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '500':
+          description: 'Internal Server Error. Hint: something crashed so hard'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
   /user/:
     post:
       summary: Create new user
@@ -244,6 +277,39 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Item'
+    AccessTokenRequest:
+      required:
+        - grant_type
+        - client_id
+        - scope
+        - username
+        - password
+      properties:
+        grant_type:
+          type: string
+        client_id:
+          type: string
+        scope:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+    AccessTokenResponse:
+      required:
+        - token_type
+        - expires_in
+        - access_token
+        - refresh_token
+      properties:
+        token_type:
+          type: string
+        expires_in:
+          type: number
+        access_token:
+          type: string
+        refresh_token:
+          type: string
     Message:
       required:
         - message
@@ -251,8 +317,13 @@ components:
         message:
           type: string
   securitySchemes:
-    basicAuth:
-      type: http
-      scheme: basic
+    oAuth:
+      type: oauth2
+      description: This API uses OAuth 2 with the password grant flow. [More info](https://oauth2.thephpleague.com/authorization-server/resource-owner-password-credentials-grant/)
+      flows:
+        password:
+          authorizationUrl: https://mmc-api.motherfocas.eu/accesstoken
+          scopes:
+            default: default permission, cyka!
 security:
-  - basicAuth: []
+  - oAuth: []

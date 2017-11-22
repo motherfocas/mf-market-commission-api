@@ -1,0 +1,18 @@
+domain\entity\oauth\RefreshToken:
+  type: entity
+  table: oauth_refresh_token
+  fields:
+    identifier:
+      column: id
+      type: string
+      length: 100
+      id: true
+    expiryDateTime:
+      column: expiry
+      type: datetime
+  manyToOne:
+    accessToken:
+      targetEntity: AccessToken
+      joinColumn:
+        name: access_token_id
+        referencedColumnName: id

@@ -1,0 +1,12 @@
+domain\entity\oauth\Scope:
+  type: entity
+  table: oauth_scope
+  fields:
+    identifier:
+      column: id
+      type: string
+      length: 40
+      id: true
+    name:
+      type: string
+      length: 255
