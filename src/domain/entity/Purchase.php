@@ -84,7 +84,7 @@ class Purchase
             $total += $item->getPrice();
         }
 
-        return number_format($total, 2);
+        return $total;
     }
 
     public function getTotalItems(): int

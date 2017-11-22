@@ -33,7 +33,7 @@ class Item
 
     public function getPrice(): float
     {
-        return number_format($this->price, 2);
+        return $this->price;
     }
 
     public function update(Item $item)
