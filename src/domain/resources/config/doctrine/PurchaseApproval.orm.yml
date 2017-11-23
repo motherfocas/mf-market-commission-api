@@ -1,0 +1,22 @@
+domain\entity\PurchaseApproval:
+  type: entity
+  table: purchase_approval
+  id:
+    purchase:
+      associationKey: true
+    user:
+      associationKey: true
+  fields:
+    approved:
+      type: boolean
+  manyToOne:
+    purchase:
+      targetEntity: Purchase
+      joinColumn:
+        name: purchase_id
+        referencedColumnName: id
+    user:
+      targetEntity: User
+      joinColumn:
+        name: user_id
+        referencedColumnName: id

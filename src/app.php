@@ -8,9 +8,13 @@ use domain\entity\oauth\Client;
 use domain\entity\oauth\RefreshToken;
 use domain\entity\oauth\Scope;
 use domain\entity\Purchase;
+use domain\entity\PurchaseApproval;
 use domain\entity\User;
 use domain\helper\HttpFoundationHelper;
 use domain\mapper\JsonToUserMapper;
+use domain\repository\PurchaseApprovalRepository;
+use domain\repository\PurchaseRepository;
+use domain\usecase\PurchaseChangeStatusUseCase;
 use domain\usecase\PurchaseDeleteUseCase;
 use domain\usecase\PurchaseFindByIdUseCase;
 use domain\usecase\PurchaseFindUseCase;
@@ -20,12 +24,17 @@ use domain\usecase\UserFindByIdUseCase;
 use domain\usecase\UserSaveUseCase;
 use infrastructure\repository\DoctrineAccessTokenRepository;
 use infrastructure\repository\DoctrineClientRepository;
+use infrastructure\repository\DoctrinePurchaseApprovalRepository;
 use infrastructure\repository\DoctrinePurchaseRepository;
 use infrastructure\repository\DoctrineRefreshTokenRepository;
 use infrastructure\repository\DoctrineScopeRepository;
 use infrastructure\repository\DoctrineUserRepository;
 use League\OAuth2\Server\AuthorizationServer;
 use League\OAuth2\Server\Grant\PasswordGrant;
+use League\OAuth2\Server\Repositories\AccessTokenRepositoryInterface;
+use League\OAuth2\Server\Repositories\ClientRepositoryInterface;
+use League\OAuth2\Server\Repositories\RefreshTokenRepositoryInterface;
+use League\OAuth2\Server\Repositories\ScopeRepositoryInterface;
 use League\OAuth2\Server\ResourceServer;
 use Silex\Application;
 use Silex\Provider\DoctrineServiceProvider;
@@ -72,32 +81,37 @@ $app->register(new DoctrineOrmServiceProvider, [
 //
 // Repositories
 //
-$app['repository.purchase'] = function($app): DoctrinePurchaseRepository {
+$app['repository.purchase'] = function($app): PurchaseRepository {
     /** @var EntityManager $entityManager */
     $entityManager = $app['orm.em'];
     return new DoctrinePurchaseRepository($entityManager->getRepository(Purchase::class), $entityManager);
+};
+$app['repository.purchase_approval'] = function($app): PurchaseApprovalRepository {
+    /** @var EntityManager $entityManager */
+    $entityManager = $app['orm.em'];
+    return new DoctrinePurchaseApprovalRepository($entityManager->getRepository(PurchaseApproval::class), $entityManager);
 };
 $app['repository.user'] = function($app): DoctrineUserRepository {
     /** @var EntityManager $entityManager */
     $entityManager = $app['orm.em'];
     return new DoctrineUserRepository($entityManager->getRepository(User::class), $entityManager);
 };
-$app['repository.oauth.client'] = function($app): DoctrineClientRepository {
+$app['repository.oauth.client'] = function($app): ClientRepositoryInterface {
     /** @var EntityManager $entityManager */
     $entityManager = $app['orm.em'];
     return new DoctrineClientRepository($entityManager->getRepository(Client::class));
 };
-$app['repository.oauth.scope'] = function($app): DoctrineScopeRepository {
+$app['repository.oauth.scope'] = function($app): ScopeRepositoryInterface {
     /** @var EntityManager $entityManager */
     $entityManager = $app['orm.em'];
     return new DoctrineScopeRepository($entityManager->getRepository(Scope::class));
 };
-$app['repository.oauth.access_token'] = function($app): DoctrineAccessTokenRepository {
+$app['repository.oauth.access_token'] = function($app): AccessTokenRepositoryInterface {
     /** @var EntityManager $entityManager */
     $entityManager = $app['orm.em'];
     return new DoctrineAccessTokenRepository($entityManager->getRepository(AccessToken::class), $entityManager);
 };
-$app['repository.oauth.refresh_token'] = function($app): DoctrineRefreshTokenRepository {
+$app['repository.oauth.refresh_token'] = function($app): RefreshTokenRepositoryInterface {
     /** @var EntityManager $entityManager */
     $entityManager = $app['orm.em'];
     return new DoctrineRefreshTokenRepository($entityManager->getRepository(RefreshToken::class), $entityManager);
@@ -120,6 +134,9 @@ $app['usecase.purchase.update'] = function($app): PurchaseUpdateUseCase {
 };
 $app['usecase.purchase.delete'] = function($app): PurchaseDeleteUseCase {
     return new PurchaseDeleteUseCase($app['repository.purchase']);
+};
+$app['usecase.purchase.change_status'] = function($app): PurchaseChangeStatusUseCase {
+    return new PurchaseChangeStatusUseCase($app['repository.purchase_approval']);
 };
 $app['usecase.user.find_by_id'] = function($app): UserFindByIdUseCase {
     return new UserFindByIdUseCase($app['repository.user']);
@@ -175,6 +192,6 @@ $app['http.foundation.helper'] = function(): HttpFoundationHelper {
 //
 // Debug mode
 //
-$app['debug'] = false;
+$app['debug'] = true;
 
 return $app;

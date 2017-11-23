@@ -44,6 +44,8 @@ class PurchaseController implements ControllerProviderInterface
         $factory->post('', 'app\controller\PurchaseController::save')->before($this->authMiddleware);
         $factory->patch('/{id}/', 'app\controller\PurchaseController::update')->before($this->authMiddleware);
         $factory->delete('/{id}/', 'app\controller\PurchaseController::delete')->before($this->authMiddleware);
+        $factory->post('/approve/{id}/', 'app\controller\PurchaseController::approve')->before($this->authMiddleware);
+        $factory->post('/reject/{id}/', 'app\controller\PurchaseController::reject')->before($this->authMiddleware);
 
         return $factory;
     }
@@ -61,7 +63,7 @@ class PurchaseController implements ControllerProviderInterface
         );
     }
 
-    public function findById(Application $app, $id)
+    public function findById(Application $app, int $id)
     {
         /** @var SerializerInterface $serializer */
         $serializer = $app['serializer'];
@@ -113,7 +115,7 @@ class PurchaseController implements ControllerProviderInterface
         return $response;
     }
 
-    public function update(Application $app, $id, Request $request)
+    public function update(Application $app, int $id, Request $request)
     {
         /** @var SerializerInterface $serializer */
         $serializer = $app['serializer'];
@@ -154,7 +156,7 @@ class PurchaseController implements ControllerProviderInterface
         return $response;
     }
 
-    public function delete(Application $app, $id, Request $request)
+    public function delete(Application $app, int $id, Request $request)
     {
         /** @var SerializerInterface $serializer */
         $serializer = $app['serializer'];
@@ -189,6 +191,54 @@ class PurchaseController implements ControllerProviderInterface
         catch(Exception $exception) {
             $response = new JsonResponse(
                 $serializer->serialize(new Message('Cannot delete purchase: ' . $exception->getMessage()), 'json'),
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+
+        return $response;
+    }
+
+    public function approve(Application $app, int $id, Request $request)
+    {
+        return $this->changeApprovalStatus($app, $id, true, $request);
+    }
+
+    public function reject(Application $app, int $id, Request $request)
+    {
+        return $this->changeApprovalStatus($app, $id, false, $request);
+    }
+
+    private function changeApprovalStatus(Application $app, int $id, bool $approve, Request $request)
+    {
+        /** @var SerializerInterface $serializer */
+        $serializer = $app['serializer'];
+        $user = $app['usecase.user.find_by_id']->execute($this->getUserId($request));
+
+        try {
+            /** @var Purchase $purchase */
+            $purchase = $app['usecase.purchase.find_by_id']->execute($id);
+            // TODO: si es tu propia compra no dejar aprobar o rechazar!
+            $app['usecase.purchase.change_status']->execute($purchase, $user, $approve);
+            $response = new JsonResponse(null, Response::HTTP_NO_CONTENT);
+        }
+        catch(NotAuthorizedException $exception) {
+            $response = new JsonResponse(
+                $serializer->serialize(new Message($exception->getMessage()), 'json'),
+                Response::HTTP_UNAUTHORIZED
+            );
+        }
+        catch(EntityNotFoundException $exception) {
+            $response = new JsonResponse(
+                $serializer->serialize(new Message($exception->getMessage()), 'json'),
+                Response::HTTP_UNPROCESSABLE_ENTITY
+            );
+        }
+        catch(Exception $exception) {
+            $response = new JsonResponse(
+                $serializer->serialize(
+                    new Message('Cannot change purchase approval status: ' . $exception->getMessage()),
+                    'json'
+                ),
                 Response::HTTP_INTERNAL_SERVER_ERROR
             );
         }
