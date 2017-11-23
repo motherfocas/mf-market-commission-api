@@ -25,24 +25,39 @@ class DoctrinePurchaseApprovalRepository implements PurchaseApprovalRepository
         $this->entityManager = $entityManager;
     }
 
+    /**
+     * @param int $purchaseId
+     * @return PurchaseApproval[]|array
+     */
+    public function findByPurchase(int $purchaseId): array
+    {
+        /** @var PurchaseApproval $status */
+        $purchaseApprovals = $this->entityRepository->findBy(['purchase' => $purchaseId]);
+
+        if($purchaseApprovals === null) {
+            return [];
+        }
+
+        return $purchaseApprovals;
+    }
 
     public function changeStatus(int $purchaseId, int $userId, bool $status)
     {
         /** @var PurchaseApproval $status */
-        $dbStatus = $this->entityRepository->findOneBy(['purchase' => $purchaseId, 'user' => $userId]);
+        $purchaseApproval = $this->entityRepository->findOneBy(['purchase' => $purchaseId, 'user' => $userId]);
 
-        if($dbStatus === null) {
-            $dbStatus = new PurchaseApproval(
+        if($purchaseApproval === null) {
+            $purchaseApproval = new PurchaseApproval(
                 $this->entityManager->getReference('domain\entity\Purchase', $purchaseId),
                 $this->entityManager->getReference('domain\entity\User', $userId),
                 $status
             );
         }
         else {
-            $dbStatus->setApproved($status);
+            $purchaseApproval->setApproved($status);
         }
 
-        $this->entityManager->persist($dbStatus);
+        $this->entityManager->persist($purchaseApproval);
         $this->entityManager->flush();
     }
 }

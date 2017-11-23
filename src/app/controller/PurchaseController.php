@@ -7,6 +7,7 @@ use domain\entity\Message;
 use domain\entity\Purchase;
 use domain\entity\Purchases;
 use domain\entity\User;
+use domain\exception\CannotApproveOwnPurchaseException;
 use domain\exception\NotAuthorizedException;
 use domain\response\JsonResponse;
 use Exception;
@@ -40,12 +41,12 @@ class PurchaseController implements ControllerProviderInterface
         /** @var ControllerCollection $factory */
         $factory = $app['controllers_factory'];
         $factory->get('', 'app\controller\PurchaseController::list')->before($this->authMiddleware);
-        $factory->get('/{id}/', 'app\controller\PurchaseController::findById')->before($this->authMiddleware);
+        $factory->get('/{id}/', 'app\controller\PurchaseController::detail')->before($this->authMiddleware);
         $factory->post('', 'app\controller\PurchaseController::save')->before($this->authMiddleware);
         $factory->patch('/{id}/', 'app\controller\PurchaseController::update')->before($this->authMiddleware);
         $factory->delete('/{id}/', 'app\controller\PurchaseController::delete')->before($this->authMiddleware);
-        $factory->post('/approve/{id}/', 'app\controller\PurchaseController::approve')->before($this->authMiddleware);
-        $factory->post('/reject/{id}/', 'app\controller\PurchaseController::reject')->before($this->authMiddleware);
+        $factory->post('/{id}/approve/', 'app\controller\PurchaseController::approve')->before($this->authMiddleware);
+        $factory->post('/{id}/reject/', 'app\controller\PurchaseController::reject')->before($this->authMiddleware);
 
         return $factory;
     }
@@ -63,7 +64,7 @@ class PurchaseController implements ControllerProviderInterface
         );
     }
 
-    public function findById(Application $app, int $id)
+    public function detail(Application $app, int $id)
     {
         /** @var SerializerInterface $serializer */
         $serializer = $app['serializer'];
@@ -71,8 +72,7 @@ class PurchaseController implements ControllerProviderInterface
 
         try {
             $response = new JsonResponse(
-                $serializer->serialize(new Purchases([$app['usecase.purchase.find_by_id']->execute($id)]),
-                    'json')
+                $serializer->serialize(new Purchases([$app['usecase.purchase.detail']->execute($id)]), 'json')
             );
         }
         catch(EntityNotFoundException $exception) {
@@ -216,8 +216,7 @@ class PurchaseController implements ControllerProviderInterface
 
         try {
             /** @var Purchase $purchase */
-            $purchase = $app['usecase.purchase.find_by_id']->execute($id);
-            // TODO: si es tu propia compra no dejar aprobar o rechazar!
+            $purchase = $app['usecase.purchase.detail']->execute($id);
             $app['usecase.purchase.change_status']->execute($purchase, $user, $approve);
             $response = new JsonResponse(null, Response::HTTP_NO_CONTENT);
         }
@@ -231,6 +230,12 @@ class PurchaseController implements ControllerProviderInterface
             $response = new JsonResponse(
                 $serializer->serialize(new Message($exception->getMessage()), 'json'),
                 Response::HTTP_UNPROCESSABLE_ENTITY
+            );
+        }
+        catch(CannotApproveOwnPurchaseException $exception) {
+            $response = new JsonResponse(
+                $serializer->serialize(new Message($exception->getMessage()), 'json'),
+                Response::HTTP_BAD_REQUEST
             );
         }
         catch(Exception $exception) {

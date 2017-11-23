@@ -27,6 +27,16 @@ class Purchase
     private $user;
 
     /**
+     * @var int
+     */
+    private $totalApprovals;
+
+    /**
+     * @var int
+     */
+    private $totalRejects;
+
+    /**
      * @var DateTime
      */
     private $date;
@@ -42,9 +52,26 @@ class Purchase
         return $this;
     }
 
+    public function getUser(): User
+    {
+        return $this->user;
+    }
+
     public function setUser(User $user): Purchase
     {
         $this->user = $user;
+        return $this;
+    }
+
+    public function setTotalApprovals(int $totalApprovals): Purchase
+    {
+        $this->totalApprovals = $totalApprovals;
+        return $this;
+    }
+
+    public function setTotalRejects(int $totalRejects): Purchase
+    {
+        $this->totalRejects = $totalRejects;
         return $this;
     }
 

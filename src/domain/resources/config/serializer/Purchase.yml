@@ -13,6 +13,14 @@ domain\entity\Purchase:
     user:
       expose: true
       type: domain\entity\User
+    totalApprovals:
+      serialized_name: total_approvals
+      expose: true
+      type: int
+    totalRejects:
+      serialized_name: total_rejects
+      expose: true
+      type: int
     date:
       expose: true
       type: DateTime
@@ -24,4 +32,4 @@ domain\entity\Purchase:
       serialized_name: total_items
       type: int
   accessor_order: custom
-  custom_accessor_order: [id, name, totalPrice, totalItems, user, date, items]
+  custom_accessor_order: [id, name, totalPrice, totalItems, user, totalApprovals, totalRejects, date, items]

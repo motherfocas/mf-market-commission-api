@@ -16,7 +16,7 @@ use domain\repository\PurchaseApprovalRepository;
 use domain\repository\PurchaseRepository;
 use domain\usecase\PurchaseChangeStatusUseCase;
 use domain\usecase\PurchaseDeleteUseCase;
-use domain\usecase\PurchaseFindByIdUseCase;
+use domain\usecase\PurchaseDetailUseCase;
 use domain\usecase\PurchaseFindUseCase;
 use domain\usecase\PurchaseSaveUseCase;
 use domain\usecase\PurchaseUpdateUseCase;
@@ -123,8 +123,8 @@ $app['repository.oauth.refresh_token'] = function($app): RefreshTokenRepositoryI
 $app['usecase.purchase.find'] = function($app): PurchaseFindUseCase {
     return new PurchaseFindUseCase($app['repository.purchase']);
 };
-$app['usecase.purchase.find_by_id'] = function($app): PurchaseFindByIdUseCase {
-    return new PurchaseFindByIdUseCase($app['repository.purchase']);
+$app['usecase.purchase.detail'] = function($app): PurchaseDetailUseCase {
+    return new PurchaseDetailUseCase($app['repository.purchase'], $app['repository.purchase_approval']);
 };
 $app['usecase.purchase.save'] = function($app): PurchaseSaveUseCase {
     return new PurchaseSaveUseCase($app['repository.purchase']);

@@ -32,6 +32,11 @@ class PurchaseApproval
         $this->approved = $approved;
     }
 
+    public function isApproved(): bool
+    {
+        return $this->approved;
+    }
+
     public function setApproved(bool $approved): PurchaseApproval
     {
         $this->approved = $approved;
