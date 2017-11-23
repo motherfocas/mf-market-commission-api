@@ -166,7 +166,7 @@ class PurchaseController implements ControllerProviderInterface
             $dbPurchase = $app['usecase.purchase.find_by_id']->execute($id);
             $this->checkPermission($dbPurchase, $user);
             $app['usecase.purchase.delete']->execute($id);
-            $response = new JsonResponse(null, Response::HTTP_OK);
+            $response = new JsonResponse(null, Response::HTTP_NO_CONTENT);
         }
         catch(NotAuthorizedException $exception) {
             $response = new JsonResponse(
