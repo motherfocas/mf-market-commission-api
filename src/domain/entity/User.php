@@ -63,7 +63,7 @@ class User implements UserInterface, UserEntityInterface
 
     public function getSalt(): ?string
     {
-        return hex2bin($this->salt);
+        return $this->salt;
     }
 
     public function setSalt(string $salt): User

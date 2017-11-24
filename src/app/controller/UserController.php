@@ -44,7 +44,7 @@ class UserController implements ControllerProviderInterface
             /** @var User $user */
             $user = $mapper->map($request->getContent());
             $user->setRoles(['ROLE_USER']);
-            $salt = bin2hex(random_bytes(self::SALT_LENGTH));
+            $salt = base64_encode(random_bytes(self::SALT_LENGTH));
             $user->setPassword($encoder->encodePassword($user->getPlainPassword(), $salt));
             $user->setSalt($salt);
             $app['usecase.user.save']->execute($user);

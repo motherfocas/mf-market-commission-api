@@ -124,7 +124,7 @@ class PurchaseController implements ControllerProviderInterface
 
         try {
             /** @var Purchase $dbPurchase */
-            $dbPurchase = $app['usecase.purchase.find_by_id']->execute($id);
+            $dbPurchase = $app['usecase.purchase.detail']->execute($id);
             $this->checkPermission($dbPurchase, $user);
             /** @var Purchase $purchase */
             $purchase = $serializer->deserialize($request->getContent(), Purchase::class, 'json');
@@ -165,7 +165,7 @@ class PurchaseController implements ControllerProviderInterface
 
         try {
             /** @var Purchase $dbPurchase */
-            $dbPurchase = $app['usecase.purchase.find_by_id']->execute($id);
+            $dbPurchase = $app['usecase.purchase.detail']->execute($id);
             $this->checkPermission($dbPurchase, $user);
             $app['usecase.purchase.delete']->execute($id);
             $response = new JsonResponse(null, Response::HTTP_NO_CONTENT);
